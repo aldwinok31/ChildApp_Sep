@@ -18,9 +18,6 @@ class GetCurrentLocations {
 
     fun requestLocationUpdates(context: Context, id: String) {
         val request = LocationRequest()
-        request.interval = 10000
-        request.fastestInterval = 5000
-
         request.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         val blue: BluetoothAdapter
         blue = BluetoothAdapter.getDefaultAdapter()
@@ -32,7 +29,7 @@ class GetCurrentLocations {
         var dataref: DatabaseReference
         database = FirebaseDatabase.getInstance()
         var device = childDevice(serial, bluetoothName)
-
+       var bool = false
             dataref = database.getReference("Devices").child(serial)
 
             dataref.addValueEventListener(object:ValueEventListener{
@@ -43,7 +40,13 @@ class GetCurrentLocations {
                 override fun onDataChange(p0: DataSnapshot?) {
                     if(!p0!!.hasChild("ParentList")) {
                         dataref.setValue(device)
+
                     }
+if(p0!!.hasChild("Locations")){
+
+    bool = true
+}
+
                 }
                 })
 
@@ -55,8 +58,6 @@ class GetCurrentLocations {
 
             request.setFastestInterval(5000)
                     .setInterval(10000)
-            request.fastestInterval = 5000
-            request.interval = 10000
 
     Toast.makeText(context.applicationContext,id,Toast.LENGTH_SHORT).show()
             client.requestLocationUpdates(request, object : LocationCallback() {
@@ -65,9 +66,9 @@ class GetCurrentLocations {
 
                     if (location != null) {
                         var mmap : HashMap<String,Any?> = HashMap()
-                        mmap.put("Locations",location)
-                        dataref.updateChildren(mmap)
 
+                        mmap.put("Locations", location)
+                        dataref.updateChildren(mmap)
 
 
                     }

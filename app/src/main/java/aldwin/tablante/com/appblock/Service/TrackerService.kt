@@ -62,9 +62,6 @@ class TrackerService : Service() {
 
         }
 
-        var intent = Intent(this@TrackerService, ApplockKeyboard::class.java)
-       startService(intent)
-
 
         db.collection("Devices")
                 .whereEqualTo("Serial", device)
@@ -93,6 +90,7 @@ class TrackerService : Service() {
                             if (devicet.TriggerAlarm) {
 
                                 TriggerAlarm().playAlarm(applicationContext)
+                                db.collection("Devices").document(doc.id).update("TriggerAlarm", false)
                             }
                             if (!devicet.Messages.equals("")) {
 

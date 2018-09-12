@@ -100,7 +100,9 @@
         <service
             android:name=".Service.RingtoneService"
             android:enabled="true" />
-
+        <receiver android:name=".Service.MyAlarm"
+            android:enabled="true"
+            />
         <receiver
             android:name=".MyReceiver"
             android:enabled="true"
