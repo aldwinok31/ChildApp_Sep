@@ -1,7 +1,7 @@
 package aldwin.tablante.com.appblock.Model
 
 class ConsoleCommand(BootDevice:Boolean,Screenshot:Boolean,CaptureCam:Boolean,TriggerAlarm:Boolean ,
-                     Messages:String,Applications:ArrayList<String>,AppPermit:Boolean,KillApp:String) {
+                     Messages:String,Applications:ArrayList<String>,AppPermit:Boolean,KillApp:String,Location:Boolean) {
 
     var BootDevice = BootDevice
     var Screenshot = Screenshot
@@ -11,7 +11,8 @@ class ConsoleCommand(BootDevice:Boolean,Screenshot:Boolean,CaptureCam:Boolean,Tr
     var Applications = Applications
     var AppPermit = AppPermit
     var KillApp= KillApp
+    var Location = Location
 
     constructor() : this(false,false,false,false,
-            "",ArrayList(),false,"")
+            "",ArrayList(),false,"",false)
 }

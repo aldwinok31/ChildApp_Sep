@@ -74,9 +74,9 @@ private var serial = ""
     inner class MediaProjectionCallback : MediaProjection.Callback() {
 
         override fun onStop() {
-            if (TB.isChecked) {
+            if (false) {
 
-                TB.isChecked = false
+
                 mediaRecorder!!.stop()
                 mediaRecorder!!.reset()
             }
@@ -113,7 +113,7 @@ private var serial = ""
                                 android.Manifest.permission.RECORD_AUDIO)
                 ) {
 
-                    TB.isChecked = false
+
                     Snackbar.make(rootLayout, "Permissions", Snackbar.LENGTH_INDEFINITE)
                             .setAction("ENABLE", {
 
@@ -235,7 +235,7 @@ private var serial = ""
                         == PackageManager.PERMISSION_GRANTED) {
                     startRecording()
                 } else {
-                    TB.isChecked = false
+
                     Snackbar.make(rootLayout, "Permissions", Snackbar.LENGTH_INDEFINITE)
                             .setAction("ENABLE", {
 
@@ -255,8 +255,7 @@ private var serial = ""
 
     override fun onBackPressed() {
         super.onBackPressed()
-        var intent = Intent(applicationContext,RequestCamera::class.java)
-        startActivity(intent)
+
     }
 
     private fun stopScreenRecord() {
@@ -271,7 +270,7 @@ private var serial = ""
         var dbase = FirebaseDatabase.getInstance()
         var rdbase = dbase.getReference("Videos")
         var file = Uri.fromFile(File(videoURI))
-        Toast.makeText(applicationContext, videoURI, Toast.LENGTH_LONG).show()
+        //Toast.makeText(applicationContext, videoURI, Toast.LENGTH_LONG).show()
         rbase.child(serial).child(serial+dateform).putFile(file)
                 .addOnSuccessListener { bool = true
 
@@ -287,16 +286,7 @@ private var serial = ""
 
 
     }
-    fun getCurrentTime(): Date {
 
-        val calendar = Calendar.getInstance()
-        val mdformat = SimpleDateFormat("HH:mm:ss")
-        val strDate = calendar.time
-
-        return strDate
-
-
-    }
 
     private fun destroyMediaProjection() {
         if (mediaProjection != null) {
@@ -305,6 +295,8 @@ private var serial = ""
             mediaProjection!!.unregisterCallback(mediaProjectionCallBack)
             mediaProjection!!.stop()
             mediaProjection = null
+            val intent = Intent(applicationContext,MainActivity::class.java)
+            startActivity(intent)
             finish()
 
         }
@@ -319,7 +311,7 @@ private var serial = ""
 
         override fun onPreExecute() {
             super.onPreExecute()
-            TB.visibility = View.GONE
+
         }
         override fun doInBackground(vararg p0: Void?): Void? {
             Thread.sleep(2000)
@@ -329,7 +321,7 @@ private var serial = ""
         override fun onPostExecute(result: Void?) {
             super.onPostExecute(result)
 
-            TB.visibility = View.VISIBLE
+
             mediaRecorder!!.stop()
             mediaRecorder!!.reset()
             stopScreenRecord()
@@ -338,14 +330,7 @@ private var serial = ""
 
     override fun onPause() {
         super.onPause()
-         if(!bool) {
-             if (this.isFinishing) {
-                 var intent = Intent(applicationContext, RequestCamera::class.java)
 
-                 startActivity(intent)
-
-             }
-         }
     }
 
 }

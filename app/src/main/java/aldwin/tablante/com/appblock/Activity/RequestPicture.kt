@@ -5,15 +5,21 @@ import aldwin.tablante.com.appblock.Service.TrackerService
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.drawable.AnimationDrawable
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
+import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.Toast
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.wonderkiln.camerakit.*
@@ -27,34 +33,61 @@ import java.util.*
 class RequestPicture : AppCompatActivity() {
     var aID = ""
     var sID= ""
+    var anim : AnimationDrawable? = null
+
     var bmap : Bitmap? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
+        val permissions = arrayOf(android.Manifest.permission.CAMERA
+        )
+        ActivityCompat.requestPermissions(this, permissions,0)
 
         cameraView.facing = CameraKit.Constants.FACING_FRONT
 
         cameraView.start()
+        logoSplash.setBackgroundResource(R.drawable.loading)
 
 
 
 
-        var accID = intent.getStringExtra("id")
         var serial = intent.getStringExtra("serial")
+        var db = FirebaseFirestore.getInstance()
+        var accID = ""
+
+                db.collection("RequestImage").whereEqualTo("Serial",serial)
+                        .addSnapshotListener(object : EventListener<QuerySnapshot>{
+                            override fun onEvent(p0: QuerySnapshot?, p1: FirebaseFirestoreException?) {
+                                for (doc in p0!!.documents){
+
+                                  accID =  doc.get("RequestID").toString()
+                                    break
+                                }
+                            }
+                        })
 
         capture.setOnClickListener {
             cameraView.captureImage()
-            this.moveTaskToBack(true)
+           capture.visibility = View.GONE
+            splashScreen.visibility = View.VISIBLE
+            anim = logoSplash.background as AnimationDrawable
+            anim!!.start()
+            //loader().execute()
+           //this.moveTaskToBack(true)
 
-            cameraView.stop()
 
         }
+
+
         cameraView.addCameraKitListener(object : CameraKitEventListener {
             override fun onError(p0: CameraKitError?) {
+
                 null
             }
 
             override fun onEvent(p0: CameraKitEvent?) {
+
+
                 null
             }
 
@@ -73,18 +106,20 @@ class RequestPicture : AppCompatActivity() {
                 val bos = ByteArrayOutputStream()
 
                 bmap = p0!!.bitmap
-                p0!!.bitmap.compress(Bitmap.CompressFormat.PNG, 0, bos)
+                p0!!.bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bos)
+
                 val bitmapdata = bos.toByteArray()
                 Thread.sleep(2000)
                 val fos = FileOutputStream(f)
+
                 fos.write(bitmapdata)
                 fos.flush()
                 fos.close()
 
-             /*   aID = accID
-                sID = serial
-                loader().execute(videoUri)*/
-                uploadImage(accID, f, serial, applicationContext)
+              // aID = accID
+             //   sID = serial
+              //  loader().execute(videoUri)
+               uploadImage(accID, f, serial, applicationContext)
 
 
             }
@@ -107,35 +142,54 @@ class RequestPicture : AppCompatActivity() {
     }
 
     fun uploadImage(accID: String, file: File, serial: String, context: Context) {
-        var fbase = FirebaseDatabase.getInstance()
-        var refbase = fbase.getReference()
-        var map: HashMap<String, Any?> = HashMap()
-        map.put("Serial", serial)
-        map.put("image", serial + getCurrentTime().toGMTString().toString())
-        map.put("timeStamp", getCurrentTime())
-        refbase.child("Images").child(serial).child(getCurrentTime().toGMTString()).setValue(map)
 
 
         storageFire(file, accID, serial)
-        databaseFire(accID, serial)
+
 
     }
 
-    fun databaseFire(accID: String, serial: String) {
+    fun databaseFire(accID: String, serial: String,url:String) {
         var fbase = FirebaseFirestore.getInstance()
         var rbase = fbase.collection("RequestImage")
-        rbase.document(accID + serial).delete()
+        Toast.makeText(applicationContext,accID+serial,Toast.LENGTH_LONG).show()
+        rbase.document(accID +""+ serial).delete()
 
 
     }
 
     fun storageFire(file: File, accID: String, serial: String) {
+        var timer =  serial + getCurrentTime().toGMTString().toString()
         var storage = FirebaseStorage.getInstance()
         var ref: StorageReference = storage.getReference("Images")
-        ref.child(serial).child(serial + getCurrentTime().toGMTString().toString()).putFile(Uri.fromFile(file))
+        ref.child(serial).child(timer).putFile(Uri.fromFile(file))
                 .addOnSuccessListener {
-                    var intent = Intent(applicationContext,MainActivity::class.java)
-                    startActivity(intent)
+
+
+                     ref.child(serial).child(timer).downloadUrl.addOnSuccessListener {v->
+
+                         var fbase = FirebaseDatabase.getInstance()
+                         var refbase = fbase.getReference()
+                         var map: HashMap<String, Any?> = HashMap()
+                         map.put("Serial", serial)
+                         map.put("image", timer.toString())
+                         map.put("url",v.toString())
+                         refbase.child("Images").child(serial).child("ChildImage").setValue(map)
+
+
+                     }
+
+
+                          .addOnFailureListener { Toast.makeText(applicationContext,"fail",Toast.LENGTH_LONG).show() }
+                    //databaseFire(accID, serial,url)
+
+
+
+
+                    anim!!.stop()
+                    cameraView.stop()
+                   var intent = Intent(applicationContext,MainActivity::class.java)
+                   startActivity(intent)
 
         }
 
@@ -155,34 +209,28 @@ class RequestPicture : AppCompatActivity() {
 
 
     inner class loader : AsyncTask<File, Void, Void>() {
+        override fun onPreExecute() {
+            super.onPreExecute()
 
+
+
+        }
 
         override fun doInBackground(vararg p0: File?): Void? {
 
-
-            val imageName = "ChildApp.png"
-            val f = File(p0[0], imageName)
-
-            f.createNewFile()
-            Thread.sleep(2000)
-            val bos = ByteArrayOutputStream()
-            Thread.sleep(2000)
-            bmap!!.compress(Bitmap.CompressFormat.PNG, 0, bos)
-
-            val bitmapdata = bos.toByteArray()
-            val fos = FileOutputStream(f)
-            fos.write(bitmapdata)
-            Thread.sleep(2000)
-            fos.flush()
-            fos.close()
-            uploadImage(aID, f, sID, applicationContext)
+          Thread.sleep(5000)
             return null
+        }
+
+        override fun onPostExecute(result: Void?) {
+            super.onPostExecute(result)
+
         }
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
-        var intent = Intent(applicationContext,MainActivity::class.java)
+        var intent = Intent(applicationContext,RequestPicture::class.java)
         intent.putExtra("id",intent.getStringExtra("id"))
         intent.putExtra("serial",intent.getStringExtra("serial"))
         startActivity(intent)

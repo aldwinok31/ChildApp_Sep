@@ -32,6 +32,6 @@ class MainActivity : Activity(){
 
 
        this.moveTaskToBack(true)
-              // finish()
+               finish()
     }
 }

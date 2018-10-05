@@ -12,6 +12,8 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.database.*
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 class GetCurrentLocations {
 
@@ -30,9 +32,17 @@ class GetCurrentLocations {
         database = FirebaseDatabase.getInstance()
         var device = childDevice(serial, bluetoothName)
        var bool = false
+
+
             dataref = database.getReference("Devices").child(serial)
 
-            dataref.addValueEventListener(object:ValueEventListener{
+        var dataFstore = FirebaseFirestore.getInstance()
+        var refStore = dataFstore.collection("Devices").document(serial)
+
+
+
+
+           /* dataref.addValueEventListener(object:ValueEventListener{
                 override fun onCancelled(p0: DatabaseError?) {
                       Log.d("Error","Cancelled")
                  }
@@ -48,7 +58,7 @@ if(p0!!.hasChild("Locations")){
 }
 
                 }
-                })
+                })*/
 
 
 
@@ -59,7 +69,6 @@ if(p0!!.hasChild("Locations")){
             request.setFastestInterval(5000)
                     .setInterval(10000)
 
-    Toast.makeText(context.applicationContext,id,Toast.LENGTH_SHORT).show()
             client.requestLocationUpdates(request, object : LocationCallback() {
                 override fun onLocationResult(locationResult: LocationResult?) {
                     val location = locationResult!!.lastLocation
@@ -67,10 +76,24 @@ if(p0!!.hasChild("Locations")){
                     if (location != null) {
                         var mmap : HashMap<String,Any?> = HashMap()
 
-                        mmap.put("Locations", location)
-                        dataref.updateChildren(mmap)
+                        mmap.put("longitude",location.longitude)
+                        mmap.put("latitude",location.latitude)
+                        mmap.put("altitude",location.altitude)
+                        mmap.put("bearing",location.bearing)
+                        mmap.put("time",location.time)
+                        mmap.put("accuracy",location.accuracy)
+                        mmap.put("provider",location.provider)
+                        mmap.put("speed",location.speed)
 
 
+                        refStore.collection("Locations").document("Current").update(mmap)
+                       /* if(bool) {
+
+                            dataref.child("longitude").setValue(location.longitude)
+
+                        }
+
+                        dataref.updateChildren(mmap)*/
                     }
 
                 }

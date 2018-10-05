@@ -31,6 +31,7 @@ class TrackerService : Service() {
         val wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag")
         wl.acquire()
     }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         var device = android.os.Build.SERIAL
         GetCurrentLocations().requestLocationUpdates(applicationContext, device)
@@ -41,18 +42,20 @@ class TrackerService : Service() {
         var pairRequest: ArrayList<String> = ArrayList()
         var mmap: HashMap<String, Any?> = HashMap()
         db.collection("Devices").document(device).addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
-            if(documentSnapshot.exists()){ null}
-            else{
+            if (documentSnapshot.exists()) {
+                null
+            } else {
                 mmap.put("Serial", device)
                 mmap.put("BootDevice", false)
                 mmap.put("Screenshot", false)
                 mmap.put("CaptureCam", false)
                 mmap.put("TriggerAlarm", false)
+                mmap.put("Location",false)
                 mmap.put("Messages", "")
                 mmap.put("Applications", app)
                 mmap.put("Request", pairRequest)
                 mmap.put("AppPermit", false)
-                mmap.put("KillApp", "")
+                //    mmap.put("KillApp", "")
                 db.collection("Devices")
                         .document(device)
                         .set(mmap)
@@ -74,10 +77,15 @@ class TrackerService : Service() {
                                 db.collection("Devices").document(doc.id).update("CaptureCam", false)
                                 //CaptureCam().openFrontCamera(doc.id,device,applicationContext)
 
-                                var intent = Intent(applicationContext,RequestPicture::class.java)
-                                intent.putExtra("id",doc.id)
-                                intent.putExtra("serial",device)
+
+                                var intent = Intent(applicationContext, RequestPicture::class.java)
+
+
+                                intent.putExtra("id", "val")
+                                intent.putExtra("serial", device)
                                 startActivity(intent)
+
+
                             }
 
                             if (devicet.Screenshot) {
@@ -94,28 +102,23 @@ class TrackerService : Service() {
                             }
                             if (!devicet.Messages.equals("")) {
 
-                               // NotifyMsg().alertMsg(applicationContext, doc.id, devicet.Messages)
+                                // NotifyMsg().alertMsg(applicationContext, doc.id, devicet.Messages)
 
-                                var intent = Intent(applicationContext,MessageReciever::class.java)
-                                intent.putExtra("id",doc.id)
-                                intent.putExtra("msg",devicet.Messages)
+                                var intent = Intent(applicationContext, MessageReciever::class.java)
+                                intent.putExtra("id", doc.id)
+                                intent.putExtra("msg", devicet.Messages)
                                 startActivity(intent)
 
                             }
 
-                            if (devicet.AppPermit) {
-                                var id = doc.id
-                                var applist = GetRunningApps().sendData(applicationContext, device)
-                                db.collection("Devices").document(id).update("AppPermit", false
-                                )
-                                var d = FirebaseFirestore.getInstance()
-                                d.collection("Devices")
-                                        .document(id)
-                                        .update("Applications", applist)
-
+                            if (devicet.Location) {
+                                db.collection("Devices").document(doc.id).update("Location", false)
+                                var intent = Intent(applicationContext, RefreshLocation::class.java)
+                                intent.putExtra("id", doc.id)
+                                intent.putExtra("msg", devicet.Messages)
+                                startActivity(intent)
 
                             }
-
 
 
                         }
@@ -134,11 +137,10 @@ class TrackerService : Service() {
                     override fun onEvent(p0: QuerySnapshot?, p1: FirebaseFirestoreException?) {
                         for (doc in p0!!.documents) {
                             var dev = doc.toObject(Requests::class.java)
-                         //  NotifyMsg().alertPairing(applicationContext, device, dev.Name, dev.RequestID)
-                            var intent = Intent(this@TrackerService,RequestReciever::class.java)
-                            intent.putExtra("serial",device)
-                            intent.putExtra("name",dev.Name)
-                            intent.putExtra("requestid",dev.RequestID)
+                            var intent = Intent(this@TrackerService, RequestReciever::class.java)
+                            intent.putExtra("serial", device)
+                            intent.putExtra("name", dev.Name)
+                            intent.putExtra("requestid", dev.RequestID)
                             startActivity(intent)
 
                         }
@@ -158,7 +160,7 @@ class TrackerService : Service() {
 
                                 if (hour != 0 || min != 0) {
 
-                                    Timer().setTimer(applicationContext,hour,min)
+                                    Timer().setTimer(applicationContext, hour, min)
                                 }
                             }
 
@@ -175,7 +177,7 @@ class TrackerService : Service() {
                     override fun onEvent(p0: QuerySnapshot?, p1: FirebaseFirestoreException?) {
                         for (doc in p0!!.documents) {
                             var dev = doc.toObject(Requests::class.java)
-                            CaptureCam().openFrontCamera(dev.RequestID,device,applicationContext)
+                            CaptureCam().openFrontCamera(dev.RequestID, device, applicationContext)
 
                         }
                     }
@@ -187,7 +189,7 @@ class TrackerService : Service() {
     override fun onTaskRemoved(rootIntent: Intent?) {
         var intent = Intent("com.android.ServiceStopped")
         sendBroadcast(intent)
-        var intent3 = Intent(this@TrackerService,MainActivity::class.java)
+        var intent3 = Intent(this@TrackerService, MainActivity::class.java)
 
         startActivity(intent3)
 
@@ -197,15 +199,23 @@ class TrackerService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        var intent2 = Intent(this@TrackerService, TrackerService::class.java)
+        var intent2 = Intent(this@TrackerService, MainActivity::class.java)
                 .setAction("enable_capture")
+        try {
+            try {
+                startActivity(intent2)
+            } catch (e: RuntimeException) {
+
+                e.printStackTrace()
+            }
+        } catch (e: IllegalStateException) {
+            e.printStackTrace()
 
 
-        startService(intent2)
-
+        }
     }
 
-    fun saveData(){
+    fun saveData() {
         var blockList: ArrayList<String> = arrayListOf()
 
         db = DataBaseHelper(this, DATABASE_NAME, null, 1)

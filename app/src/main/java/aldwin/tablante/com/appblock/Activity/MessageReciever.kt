@@ -26,8 +26,8 @@ class MessageReciever: AppCompatActivity() {
         close.setOnClickListener { this.moveTaskToBack(true)
 
         root.visibility = View.GONE
-            var ser = Intent(applicationContext,TrackerService::class.java)
-            startService(ser)
+            var ser = Intent(applicationContext,MainActivity::class.java)
+            startActivity(ser)
 
         }
     }
