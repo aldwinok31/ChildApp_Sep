@@ -148,40 +148,10 @@ class TrackerService : Service() {
                 })
 
 
-        db.collection("Timers")
-                .whereEqualTo("ID", device)
-                .addSnapshotListener(object : EventListener<QuerySnapshot> {
-                    override fun onEvent(p0: QuerySnapshot?, p1: FirebaseFirestoreException?) {
-                        if (!p0!!.isEmpty) {
-                            for (doc in p0!!.documents) {
-
-                                var hour = doc.get("Hour").toString().toInt()
-                                var min = doc.get("Minute").toString().toInt()
-
-                                if (hour != 0 || min != 0) {
-
-                                    Timer().setTimer(applicationContext, hour, min)
-                                }
-                            }
-
-                        }
-                    }
-                })
 
 
-        //Request Image
-        db.collection("RequestImage")
-                .whereEqualTo("Serial", device)
-                .addSnapshotListener(object : EventListener<QuerySnapshot> {
 
-                    override fun onEvent(p0: QuerySnapshot?, p1: FirebaseFirestoreException?) {
-                        for (doc in p0!!.documents) {
-                            var dev = doc.toObject(Requests::class.java)
-                            CaptureCam().openFrontCamera(dev.RequestID, device, applicationContext)
 
-                        }
-                    }
-                })
 
         return START_STICKY
     }

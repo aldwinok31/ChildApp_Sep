@@ -22,6 +22,7 @@ class RequestReciever : Activity() {
         var serial = intent.getStringExtra("serial")
         var requestid = intent.getStringExtra("requestid")
         var name = intent.getStringExtra("name")
+        textView4.setText(name.toString())
         accept.setOnClickListener {
 
 

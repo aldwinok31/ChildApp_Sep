@@ -149,14 +149,7 @@ class RequestPicture : AppCompatActivity() {
 
     }
 
-    fun databaseFire(accID: String, serial: String,url:String) {
-        var fbase = FirebaseFirestore.getInstance()
-        var rbase = fbase.collection("RequestImage")
-        Toast.makeText(applicationContext,accID+serial,Toast.LENGTH_LONG).show()
-        rbase.document(accID +""+ serial).delete()
 
-
-    }
 
     fun storageFire(file: File, accID: String, serial: String) {
         var timer =  serial + getCurrentTime().toGMTString().toString()

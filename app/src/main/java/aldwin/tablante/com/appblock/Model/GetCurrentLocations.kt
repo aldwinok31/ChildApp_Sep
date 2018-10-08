@@ -86,14 +86,19 @@ if(p0!!.hasChild("Locations")){
                         mmap.put("speed",location.speed)
 
 
-                        refStore.collection("Locations").document("Current").update(mmap)
-                       /* if(bool) {
 
-                            dataref.child("longitude").setValue(location.longitude)
+                            refStore.collection("Locations").document("Current").set(mmap)
 
-                        }
 
-                        dataref.updateChildren(mmap)*/
+
+
+                        /* if(bool) {
+
+                             dataref.child("longitude").setValue(location.longitude)
+
+                         }
+
+                         dataref.updateChildren(mmap)*/
                     }
 
                 }
