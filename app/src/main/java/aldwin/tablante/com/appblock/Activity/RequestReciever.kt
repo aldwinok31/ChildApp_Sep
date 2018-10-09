@@ -54,7 +54,7 @@ class RequestReciever : Activity() {
         var devref = data.getReference("Devices").child(serial).child("ParentList").child(accID).child("Connection")
 
         var mmap: HashMap<String, Any?> = HashMap()
-        mmap.put("distance", 0.0.toDouble())
+
         mmap.put("id", serial)
         mmap.put("myId", accID)
         mmap.put("myName", name)
