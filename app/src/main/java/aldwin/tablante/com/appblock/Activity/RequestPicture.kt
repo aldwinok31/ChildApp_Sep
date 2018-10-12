@@ -55,16 +55,7 @@ class RequestPicture : AppCompatActivity() {
         var db = FirebaseFirestore.getInstance()
         var accID = ""
 
-                db.collection("RequestImage").whereEqualTo("Serial",serial)
-                        .addSnapshotListener(object : EventListener<QuerySnapshot>{
-                            override fun onEvent(p0: QuerySnapshot?, p1: FirebaseFirestoreException?) {
-                                for (doc in p0!!.documents){
 
-                                  accID =  doc.get("RequestID").toString()
-                                    break
-                                }
-                            }
-                        })
 
         capture.setOnClickListener {
             cameraView.captureImage()

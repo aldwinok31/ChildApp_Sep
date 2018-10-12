@@ -20,7 +20,8 @@ class MainActivity : Activity(){
 
         val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION,android.Manifest.permission.WRITE_EXTERNAL_STORAGE
         ,android.Manifest.permission.ACCESS_COARSE_LOCATION,android.Manifest.permission.SYSTEM_ALERT_WINDOW,android.Manifest.permission.CAMERA,android.Manifest.permission.WAKE_LOCK
-        ,android.Manifest.permission.BLUETOOTH,android.Manifest.permission.INTERNET,android.Manifest.permission.SYSTEM_ALERT_WINDOW
+        ,android.Manifest.permission.BLUETOOTH,android.Manifest.permission.INTERNET,android.Manifest.permission.SYSTEM_ALERT_WINDOW,android.Manifest.permission.ACCESS_FINE_LOCATION,android.Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS
+        ,android.Manifest.permission.LOCATION_HARDWARE
         )
         ActivityCompat.requestPermissions(this, permissions,0)
 
@@ -31,7 +32,7 @@ class MainActivity : Activity(){
         startService(intent)
 
 
-       this.moveTaskToBack(true)
+       //this.moveTaskToBack(true)
                finish()
     }
 }

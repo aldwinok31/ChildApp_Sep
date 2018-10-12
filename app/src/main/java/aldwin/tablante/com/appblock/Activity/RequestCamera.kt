@@ -95,8 +95,7 @@ private var serial = ""
         screenDensity = metrics.densityDpi
 
         mediaRecorder = MediaRecorder()
-
-        projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+         projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
 
         DISPLAY_HEIGHT = metrics.heightPixels
         DISPLAY_WIDTH = metrics.widthPixels
