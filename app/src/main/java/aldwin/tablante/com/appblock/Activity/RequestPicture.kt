@@ -60,15 +60,12 @@ class RequestPicture : AppCompatActivity() {
         capture.setOnClickListener {
             cameraView.captureImage()
            capture.visibility = View.GONE
-            splashScreen.visibility = View.VISIBLE
-            anim = logoSplash.background as AnimationDrawable
-            anim!!.start()
+
             //loader().execute()
            //this.moveTaskToBack(true)
 
 
         }
-
 
         cameraView.addCameraKitListener(object : CameraKitEventListener {
             override fun onError(p0: CameraKitError?) {
@@ -119,6 +116,8 @@ class RequestPicture : AppCompatActivity() {
                 null
             }
         })
+        takepicture().execute()
+
     }
 
     fun getCurrentTime(): Date {
@@ -172,8 +171,10 @@ class RequestPicture : AppCompatActivity() {
 
                     anim!!.stop()
                     cameraView.stop()
-                   var intent = Intent(applicationContext,MainActivity::class.java)
-                   startActivity(intent)
+                    this.moveTaskToBack(true)
+                    var intent = Intent(applicationContext,MainActivity::class.java)
+                    startActivity(intent)
+                    finish()
 
         }
 
@@ -192,25 +193,7 @@ class RequestPicture : AppCompatActivity() {
     }
 
 
-    inner class loader : AsyncTask<File, Void, Void>() {
-        override fun onPreExecute() {
-            super.onPreExecute()
 
-
-
-        }
-
-        override fun doInBackground(vararg p0: File?): Void? {
-
-          Thread.sleep(5000)
-            return null
-        }
-
-        override fun onPostExecute(result: Void?) {
-            super.onPostExecute(result)
-
-        }
-    }
 
     override fun onBackPressed() {
         super.onBackPressed()
@@ -219,4 +202,40 @@ class RequestPicture : AppCompatActivity() {
         intent.putExtra("serial",intent.getStringExtra("serial"))
         startActivity(intent)
     }
+
+
+
+    inner class takepicture : AsyncTask<Void,Void,Void>(){
+
+        override fun onProgressUpdate(vararg values: Void?) {
+            super.onProgressUpdate(*values)
+            anim = logoSplash.background as AnimationDrawable
+            anim!!.start()
+
+        }
+        override fun doInBackground(vararg p0: Void?): Void? {
+
+            Thread.sleep(3000)
+
+               onProgressUpdate()
+
+
+
+                return null
+        }
+
+        override fun onPostExecute(result: Void?) {
+            super.onPostExecute(result)
+            if(cameraView.isStarted && cameraView.isFacingFront) {
+
+
+                capture.performClick()
+                splashScreen.visibility = View.VISIBLE
+            }
+
+        }
+
+
+    }
+
 }
